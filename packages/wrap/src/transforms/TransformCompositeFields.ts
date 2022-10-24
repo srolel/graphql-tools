@@ -137,6 +137,7 @@ export default class TransformCompositeFields<TContext = Record<string, any>>
 
     const parentTypeName = parentType.name;
     let newSelections: Array<SelectionNode> = [];
+    let addedTypeNameAlready = false
 
     for (const selection of node.selections) {
       if (selection.kind !== Kind.FIELD) {
@@ -148,8 +149,8 @@ export default class TransformCompositeFields<TContext = Record<string, any>>
 
       // See https://github.com/ardatan/graphql-tools/issues/2282
       if (
-        (this.dataTransformer != null || this.errorsTransformer != null) &&
-        (this.subscriptionTypeName == null || parentTypeName !== this.subscriptionTypeName)
+        (!addedTypeNameAlready && (this.dataTransformer != null || this.errorsTransformer != null) &&
+        (this.subscriptionTypeName == null || parentTypeName !== this.subscriptionTypeName))
       ) {
         newSelections.push({
           kind: Kind.FIELD,
@@ -158,6 +159,7 @@ export default class TransformCompositeFields<TContext = Record<string, any>>
             value: '__typename',
           },
         });
+        addedTypeNameAlready = true;
       }
 
       let transformedSelection: Maybe<SelectionNode | Array<SelectionNode>>;
